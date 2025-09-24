@@ -5,9 +5,10 @@ import ChatSidebar from '../components/chat/ChatSidebar.jsx';
 import ChatMessages from '../components/chat/ChatMessages.jsx';
 import ChatComposer from '../components/chat/ChatComposer.jsx';
 import '../components/chat/ChatLayout.css';
-import { fakeAIReply } from '../components/chat/aiClient.js';
 import { useDispatch, useSelector } from 'react-redux';
+import { GoArrowRight } from "react-icons/go";
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import {
   ensureInitialChat,
   startNewChat,
@@ -28,7 +29,7 @@ const Home = () => {
   const isSending = useSelector(state => state.chat.isSending);
   const [ sidebarOpen, setSidebarOpen ] = React.useState(false);
   const [ socket, setSocket ] = useState(null);
-
+ const navigate = useNavigate();
   const activeChat = chats.find(c => c.id === activeChatId) || null;
 
   const [ messages, setMessages ] = useState([
@@ -133,9 +134,6 @@ const Home = () => {
 
 return (
   <div className="chat-layout minimal">
-     <div className=''>
-
-     </div>
     <ChatMobileBar
       onToggleSidebar={() => setSidebarOpen(o => !o)}
       onNewChat={handleNewChat}
@@ -152,10 +150,18 @@ return (
       open={sidebarOpen}
     />
     <main className="chat-main" role="main">
+          <div className='nav'>
+            <div className='login' 
+              onClick={() => navigate("/login")}
+            >
+              <p>Login</p>
+              <GoArrowRight className='arrow'/>
+            </div>
+          </div>
       {messages.length === 0 && (
         <div className="chat-welcome" aria-hidden="true">
           <div className="chip">Early Preview</div>
-          <h1>ChatGPT Clone</h1>
+          <h1>ChatGPT Lite</h1>
           <p>Ask anything. Paste text, brainstorm ideas, or get quick explanations. Your chats stay in the sidebar so you can pick up where you left off.</p>
         </div>
       )}

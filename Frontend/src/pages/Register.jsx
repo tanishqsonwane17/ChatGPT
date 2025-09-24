@@ -46,7 +46,7 @@ const Register = () => {
     }
 
     return (
-        <div className="center-min-h-screen">
+        <div className="center-min-h-screen ">
             <div className="auth-card" role="main" aria-labelledby="register-heading">
                 <header className="auth-header">
                     <h1 id="register-heading">Create account</h1>
