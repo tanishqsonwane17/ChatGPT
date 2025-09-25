@@ -19,7 +19,7 @@ const Login = () => {
         setSubmitting(true);
         console.log(form);
 
-        axios.post("http://localhost:3000/api/auth/login", {
+        axios.post("https://chatgpt-2r0k.onrender.com/api/auth/login", {
             email: form.email,
             password: form.password
         },

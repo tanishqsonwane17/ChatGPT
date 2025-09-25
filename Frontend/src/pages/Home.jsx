@@ -40,7 +40,7 @@ const Home = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/chat",
+        "https://chatgpt-2r0k.onrender.com/api/chat",
         { title: title.trim() },
         { withCredentials: true }
       );
@@ -57,10 +57,10 @@ const Home = () => {
   };
 
   useEffect(() => {
-    axios.get("http://localhost:3000/api/chat", { withCredentials: true })
+    axios.get("https://chatgpt-2r0k.onrender.com/api/chat", { withCredentials: true })
       .then(response => dispatch(setChats(response.data.chats.reverse())));
 
-    const tempSocket = io("http://localhost:3000", { withCredentials: true });
+    const tempSocket = io("https://chatgpt-2r0k.onrender.com", { withCredentials: true });
 
     tempSocket.on("ai-response", (messagePayload) => {
       setMessages(prev => [
@@ -92,7 +92,7 @@ const Home = () => {
   }, []);
 
   const getMessages = async (chatId) => {
-    const response = await axios.get(`http://localhost:3000/api/chat/messages/${chatId}`, { withCredentials: true });
+    const response = await axios.get(`https://chatgpt-2r0k.onrender.com/api/chat/messages/${chatId}`, { withCredentials: true });
     setMessages(response.data.messages.map(m => ({
       type: m.role === 'user' ? 'user' : 'ai',
       content: m.content
