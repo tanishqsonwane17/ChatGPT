@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { GoArrowRight } from "react-icons/go";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../utils/Axios.jsx';
 import {
   startNewChat,
   selectChat,
@@ -39,7 +40,7 @@ const Home = () => {
     if (!title.trim()) return;
 
     try {
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         "/api/chat",
         { title: title.trim() },
         { withCredentials: true }
@@ -57,7 +58,7 @@ const Home = () => {
   };
 
   useEffect(() => {
-    axios.get("//api/chat", { withCredentials: true })
+    axiosInstance.get("/api/chat", { withCredentials: true })
       .then(response => dispatch(setChats(response.data.chats.reverse())));
 
     const tempSocket = io("/", { withCredentials: true });
@@ -92,7 +93,7 @@ const Home = () => {
   }, []);
 
   const getMessages = async (chatId) => {
-    const response = await axios.get(`/api/chat/messages/${chatId}`, { withCredentials: true });
+    const response = await axiosInstance.get(`/api/chat/messages/${chatId}`, { withCredentials: true });
     setMessages(response.data.messages.map(m => ({
       type: m.role === 'user' ? 'user' : 'ai',
       content: m.content

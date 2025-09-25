@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import axiosInstance from '../utils/Axios';
 
 const Register = () => {
     const [ form, setForm ] = useState({ email: '', firstname: '', lastname: '', password: '' });
@@ -18,7 +19,7 @@ const Register = () => {
         setSubmitting(true);
         console.log(form);
 
-        axios.post("/api/auth/register", {
+        axiosInstance.post("/api/auth/register", {
             email: form.email,
             fullName: {
                 firstName: form.firstname,
