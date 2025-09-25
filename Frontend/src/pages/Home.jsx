@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { io } from "socket.io-client";
 import ChatMobileBar from '../components/chat/ChatMobileBar.jsx';
 import ChatSidebar from '../components/chat/ChatSidebar.jsx';
@@ -10,14 +10,11 @@ import { GoArrowRight } from "react-icons/go";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import {
-  ensureInitialChat,
   startNewChat,
   selectChat,
   setInput,
   sendingStarted,
   sendingFinished,
-  addUserMessage,
-  addAIMessage,
   setChats
 } from '../store/chatSlice.js';
 
@@ -27,163 +24,151 @@ const Home = () => {
   const activeChatId = useSelector(state => state.chat.activeChatId);
   const input = useSelector(state => state.chat.input);
   const isSending = useSelector(state => state.chat.isSending);
-  const [ sidebarOpen, setSidebarOpen ] = React.useState(false);
+  const [ sidebarOpen, setSidebarOpen ] = useState(false);
   const [ socket, setSocket ] = useState(null);
- const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
+  const [title, setTitle] = useState(""); // Modal input state
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
   const activeChat = chats.find(c => c.id === activeChatId) || null;
 
-  const [ messages, setMessages ] = useState([
-    // {
-    //   type: 'user',
-    //   content: 'Hello, how can I help you today?'
-    // },
-    // {
-    //   type: 'ai',
-    //   content: 'Hi there! I need assistance with my account.'
-    // }
-  ]);
+  const [ messages, setMessages ] = useState([]);
 
+  // Open modal instead of prompt
   const handleNewChat = async () => {
-    // Prompt user for title of new chat, fallback to 'New Chat'
-    let title = window.prompt('Enter a title for the new chat:', '');
-    if (title) title = title.trim();
-    if (!title) return
+    if (!title.trim()) return;
 
-    const response = await axios.post("http://localhost:3000/api/chat", {
-      title
-    }, {
-      withCredentials: true
-    })
-    getMessages(response.data.chat._id);
-    dispatch(startNewChat(response.data.chat));
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/chat",
+        { title: title.trim() },
+        { withCredentials: true }
+      );
+
+      getMessages(response.data.chat._id);
+      dispatch(startNewChat(response.data.chat));
+    } catch (err) {
+      console.error(err);
+    }
+
+    setTitle("");
+    setShowModal(false);
     setSidebarOpen(false);
-  }
+  };
 
-  // Ensure at least one chat exists initially
   useEffect(() => {
-
     axios.get("http://localhost:3000/api/chat", { withCredentials: true })
-      .then(response => {
-        dispatch(setChats(response.data.chats.reverse()));
-      })
+      .then(response => dispatch(setChats(response.data.chats.reverse())));
 
-    const tempSocket = io("http://localhost:3000", {
-      withCredentials: true,
-    })
+    const tempSocket = io("http://localhost:3000", { withCredentials: true });
 
     tempSocket.on("ai-response", (messagePayload) => {
-      console.log("Received AI response:", messagePayload);
-
-      setMessages((prevMessages) => [ ...prevMessages, {
-        type: 'ai',
-        content: messagePayload.content
-      } ]);
-
+      setMessages(prev => [
+        ...prev,
+        { type: 'ai', content: messagePayload.content }
+      ]);
       dispatch(sendingFinished());
     });
 
     setSocket(tempSocket);
-
   }, []);
 
   const sendMessage = async () => {
-
     const trimmed = input.trim();
-    console.log("Sending message:", trimmed);
     if (!trimmed || !activeChatId || isSending) return;
+
     dispatch(sendingStarted());
 
-    const newMessages = [ ...messages, {
-      type: 'user',
-      content: trimmed
-    } ];
-
-    console.log("New messages:", newMessages);
-
+    const newMessages = [...messages, { type: 'user', content: trimmed }];
     setMessages(newMessages);
     dispatch(setInput(''));
 
-    socket.emit("ai-message", {
-      chat: activeChatId,
-      content: trimmed
-    })
+    socket.emit("ai-message", { chat: activeChatId, content: trimmed });
+  };
 
-    // try {
-    //   const reply = await fakeAIReply(trimmed);
-    //   dispatch(addAIMessage(activeChatId, reply));
-    // } catch {
-    //   dispatch(addAIMessage(activeChatId, 'Error fetching AI response.', true));
-    // } finally {
-    //   dispatch(sendingFinished());
-    // }
-  }
+  useEffect(() => {
+    const savedUser = localStorage.getItem("token");
+    if (savedUser) setUser(JSON.parse(savedUser));
+  }, []);
 
   const getMessages = async (chatId) => {
+    const response = await axios.get(`http://localhost:3000/api/chat/messages/${chatId}`, { withCredentials: true });
+    setMessages(response.data.messages.map(m => ({
+      type: m.role === 'user' ? 'user' : 'ai',
+      content: m.content
+    })));
+  };
 
-   const response = await  axios.get(`http://localhost:3000/api/chat/messages/${chatId}`, { withCredentials: true })
-
-   console.log("Fetched messages:", response.data.messages);
-
-   setMessages(response.data.messages.map(m => ({
-     type: m.role === 'user' ? 'user' : 'ai',
-     content: m.content
-   })));
-
-  }
-
-
-return (
-  <div className="chat-layout minimal">
-    <ChatMobileBar
-      onToggleSidebar={() => setSidebarOpen(o => !o)}
-      onNewChat={handleNewChat}
-    />
-    <ChatSidebar
-      chats={chats}
-      activeChatId={activeChatId}
-      onSelectChat={(id) => {
-        dispatch(selectChat(id));
-        setSidebarOpen(false);
-        getMessages(id);
-      }}
-      onNewChat={handleNewChat}
-      open={sidebarOpen}
-    />
-    <main className="chat-main" role="main">
-          <div className='nav'>
-            <div className='login' 
-              onClick={() => navigate("/login")}
-            >
+  return (
+    <div className="chat-layout minimal">
+      <ChatMobileBar
+        onToggleSidebar={() => setSidebarOpen(o => !o)}
+        onNewChat={() => setShowModal(true)} // Open modal
+      />
+      <ChatSidebar
+        chats={chats}
+        activeChatId={activeChatId}
+        onSelectChat={(id) => { dispatch(selectChat(id)); setSidebarOpen(false); getMessages(id); }}
+        onNewChat={() => setShowModal(true)}
+        open={sidebarOpen}
+      />
+      <main className="chat-main" role="main">
+        <div className='nav'>
+          {!user && (
+            <div className='login' onClick={() => navigate("/login")}>
               <p>Login</p>
               <GoArrowRight className='arrow'/>
             </div>
-          </div>
-      {messages.length === 0 && (
-        <div className="chat-welcome" aria-hidden="true">
-          <div className="chip">Early Preview</div>
-          <h1>ChatGPT Lite</h1>
-          <p>Ask anything. Paste text, brainstorm ideas, or get quick explanations. Your chats stay in the sidebar so you can pick up where you left off.</p>
+          )}
         </div>
-      )}
-      <ChatMessages messages={messages} isSending={isSending} />
-      {
-        activeChatId &&
-        <ChatComposer
-          input={input}
-          setInput={(v) => dispatch(setInput(v))}
-          onSend={sendMessage}
-          isSending={isSending}
-        />}
-    </main>
-    {sidebarOpen && (
-      <button
-        className="sidebar-backdrop"
-        aria-label="Close sidebar"
-        onClick={() => setSidebarOpen(false)}
+
+
+       {showModal && (
+  <div className="modal-overlay">
+    <div className="modal-content">
+      <h2>New Chat</h2>
+      <input
+        type="text"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Enter chat title..."
       />
-    )}
+      <div className="modal-buttons">
+        <button onClick={() => setShowModal(false)}>Cancel</button>
+        <button onClick={handleNewChat}>Create</button>
+      </div>
+    </div>
   </div>
-);
+)}
+
+        {messages.length === 0 && (
+          <div className="chat-welcome" aria-hidden="true">
+            <div className="chip">Early Preview</div>
+            <h1>ChatGPT Lite</h1>
+            <p>Ask anything. Paste text, brainstorm ideas, or get quick explanations. Your chats stay in the sidebar so you can pick up where you left off.</p>
+          </div>
+        )}
+
+        <ChatMessages messages={messages} isSending={isSending} />
+        {activeChatId && (
+          <ChatComposer
+            input={input}
+            setInput={(v) => dispatch(setInput(v))}
+            onSend={sendMessage}
+            isSending={isSending}
+          />
+        )}
+      </main>
+
+      {sidebarOpen && (
+        <button
+          className="sidebar-backdrop"
+          aria-label="Close sidebar"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+    </div>
+  );
 };
 
 export default Home;

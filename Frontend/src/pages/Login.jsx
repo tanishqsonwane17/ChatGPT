@@ -17,8 +17,6 @@ const Login = () => {
     async function handleSubmit(e) {
         e.preventDefault();
         setSubmitting(true);
-
-
         console.log(form);
 
         axios.post("http://localhost:3000/api/auth/login", {
@@ -30,6 +28,7 @@ const Login = () => {
             }
         ).then((res) => {
             console.log(res);
+            localStorage.setItem('token', JSON.stringify(res.data.user));
             navigate("/");
         }).catch((err) => {
             console.error(err);
