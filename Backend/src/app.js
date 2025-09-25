@@ -15,7 +15,6 @@ const app = express();
 
 /* using middlewares */
 app.use(cors({
-    origin: 'https://chatgpt-2r0k.onrender.com/',
     credentials: true
 }))
 app.use(express.json());
