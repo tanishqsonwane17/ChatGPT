@@ -19,7 +19,7 @@ const Register = () => {
         setSubmitting(true);
         console.log(form);
 
-        axiosInstance.post("/api/auth/register", {
+        axiosInstance.post("/auth/register", {
             email: form.email,
             fullName: {
                 firstName: form.firstname,

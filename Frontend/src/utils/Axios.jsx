@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL:  "https://chatgpt-2r0k.onrender.com",
+  baseURL:  "/api",
   withCredentials: true
 });
 

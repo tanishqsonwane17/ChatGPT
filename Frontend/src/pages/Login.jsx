@@ -20,7 +20,7 @@ const Login = () => {
         setSubmitting(true);
         console.log(form);
 
-        axiosInstance.post("/api/auth/login", {
+        axiosInstance.post("/auth/login", {
             email: form.email,
             password: form.password
         },

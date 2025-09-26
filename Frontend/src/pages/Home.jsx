@@ -41,7 +41,7 @@ const Home = () => {
 
     try {
       const response = await axiosInstance.post(
-        "/api/chat",
+        "/chat",
         { title: title.trim() },
         { withCredentials: true }
       );
@@ -58,7 +58,7 @@ const Home = () => {
   };
 
   useEffect(() => {
-    axiosInstance.get("/api/chat", { withCredentials: true })
+    axiosInstance.get("/chat", { withCredentials: true })
       .then(response => dispatch(setChats(response.data.chats.reverse())));
 
     const tempSocket = io("/", { withCredentials: true });
@@ -93,7 +93,7 @@ const Home = () => {
   }, []);
 
   const getMessages = async (chatId) => {
-    const response = await axiosInstance.get(`/api/chat/messages/${chatId}`, { withCredentials: true });
+    const response = await axiosInstance.get(`/chat/messages/${chatId}`, { withCredentials: true });
     setMessages(response.data.messages.map(m => ({
       type: m.role === 'user' ? 'user' : 'ai',
       content: m.content
