@@ -11,7 +11,7 @@ function initSocketServer(httpServer) {
 
     const io = new Server(httpServer, {
         cors: {
-            origin: "http://localhost:3000",
+            origin: "https://bixi-devin.onrender.com",
             allowedHeaders: [ "Content-Type", "Authorization" ],
             credentials: true
         }
