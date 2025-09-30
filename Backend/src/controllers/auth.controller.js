@@ -10,7 +10,7 @@ async function registerUser(req, res) {
     const isUserAlreadyExists = await userModel.findOne({ email })
 
     if (isUserAlreadyExists) {
-        res.status(400).json({ message: "User already exists" });
+       return res.status(400).json({ message: "User already exists" });
     }
 
 
@@ -31,7 +31,7 @@ async function registerUser(req, res) {
     res.cookie("token", token)
 
 
-    res.status(201).json({
+   return res.status(201).json({
         message: "User registered successfully",
         user: {
             email: user.email,
@@ -66,7 +66,7 @@ async function loginUser(req, res) {
     res.cookie("token", token);
 
 
-    res.status(200).json({
+   return res.status(200).json({
         message: "user logged in successfully",
         user: {
             email: user.email,
@@ -79,7 +79,7 @@ async function loginUser(req, res) {
 
 async function logoutUser(req, res) {
     res.clearCookie("token");
-    res.status(200).json({ message: "User logged out successfully" });
+   return res.status(200).json({ message: "User logged out successfully" });
 }
 
 module.exports = {
