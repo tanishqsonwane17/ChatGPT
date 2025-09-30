@@ -5,11 +5,10 @@ import ChatSidebar from '../components/chat/ChatSidebar.jsx';
 import ChatMessages from '../components/chat/ChatMessages.jsx';
 import ChatComposer from '../components/chat/ChatComposer.jsx';
 import '../components/chat/ChatLayout.css';
-import { fakeAIReply } from '../components/chat/aiClient.js';
 import { useDispatch, useSelector } from 'react-redux';
+
 import axios from 'axios';
 import {
-  ensureInitialChat,
   startNewChat,
   selectChat,
   setInput,
@@ -19,6 +18,7 @@ import {
   addAIMessage,
   setChats
 } from '../store/chatSlice.js';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -28,8 +28,10 @@ const Home = () => {
   const isSending = useSelector(state => state.chat.isSending);
   const [ sidebarOpen, setSidebarOpen ] = React.useState(false);
   const [ socket, setSocket ] = useState(null);
-
+const [iloggedIn, setisLoggedIn] = useState(false);
   const activeChat = chats.find(c => c.id === activeChatId) || null;
+ const navigate = useNavigate();
+ const user = useSelector(state => state.auth.user);
 
   const [ messages, setMessages ] = useState([
     // {
@@ -133,9 +135,7 @@ const Home = () => {
 
 return (
   <div className="chat-layout minimal">
-     <div className=''>
-
-     </div>
+     
     <ChatMobileBar
       onToggleSidebar={() => setSidebarOpen(o => !o)}
       onNewChat={handleNewChat}
@@ -151,24 +151,46 @@ return (
       onNewChat={handleNewChat}
       open={sidebarOpen}
     />
+   
     <main className="chat-main" role="main">
-      {messages.length === 0 && (
-        <div className="chat-welcome" aria-hidden="true">
-          <div className="chip">Early Preview</div>
-          <h1>ChatGPT Clone</h1>
-          <p>Ask anything. Paste text, brainstorm ideas, or get quick explanations. Your chats stay in the sidebar so you can pick up where you left off.</p>
-        </div>
-      )}
-      <ChatMessages messages={messages} isSending={isSending} />
-      {
-        activeChatId &&
-        <ChatComposer
-          input={input}
-          setInput={(v) => dispatch(setInput(v))}
-          onSend={sendMessage}
-          isSending={isSending}
-        />}
+  {messages.length === 0 && (
+    <div className="chat-welcome" aria-hidden="true">
+      <div className="chip">Early Preview</div>
+      <h1>ChatGPT Lite</h1>
+      <p>Ask anything. Paste text, brainstorm ideas, or get quick explanations. Your chats stay in the sidebar so you can pick up where you left off.</p>
+    </div>
+  )}
+
+  {/* Login button only if not logged in */}
+  {/* Login button only if not logged in */}
+{/* Login / Sign Out buttons */}
+{!user ? (
+  <div className="loginNav">
+    <button onClick={() => navigate('/login')}>Login</button>
+  </div>
+) : (
+  <div className="loginNav">
+    <button onClick={() => {
+      navigate('/'); // or window.location.reload()
+    }}>
+      Sign Out
+    </button>
+  </div>
+)}
+
+
+
+  <ChatMessages messages={messages} isSending={isSending} />
+  {activeChatId && (
+    <ChatComposer
+      input={input}
+      setInput={(v) => dispatch(setInput(v))}
+      onSend={sendMessage}
+      isSending={isSending}
+    />
+  )}
     </main>
+
     {sidebarOpen && (
       <button
         className="sidebar-backdrop"

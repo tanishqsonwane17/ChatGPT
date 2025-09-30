@@ -178,13 +178,32 @@ button.primary-btn:disabled {
 /* Theme toggle removed since system preference is used */
 
 /* Smooth theme transition */
-html {
-  transition: background-color .3s, color .3s;
+
+.loginNav{
+  height: 10vh;
+  width: 100%;
+  display: flex;
+  justify-content: end;
+  padding-right: 2rem;
+  font-size: 10px;
+  align-items: center;
 }
 
-body,
-.auth-card,
-input,
-button {
-  transition: background-color .3s, color .3s, border-color .3s;
+.loginNav button{
+  cursor: pointer;
+  width: 12%; /* desktop width */
+  color: white;
+  background-color: rgba(30, 30, 30, 0.602);
+  padding: 12px 40px;
+  border: 1px solid white;
+  border-radius: 10px;
+}
+
+/* Mobile friendly adjustments */
+@media (max-width: 480px) {
+  .loginNav button {
+    width: 40%;       /* phone pe choti width */
+    padding: 8px 16px; /* choti padding */
+    font-size: 12px;   /* thoda chhota font */
+  }
 }
