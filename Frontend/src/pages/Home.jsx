@@ -50,7 +50,7 @@ const [iloggedIn, setisLoggedIn] = useState(false);
     if (title) title = title.trim();
     if (!title) return
 
-    const response = await axios.post("http://localhost:3000/api/chat", {
+    const response = await axios.post("api/chat", {
       title
     }, {
       withCredentials: true
@@ -63,12 +63,12 @@ const [iloggedIn, setisLoggedIn] = useState(false);
   // Ensure at least one chat exists initially
   useEffect(() => {
 
-    axios.get("http://localhost:3000/api/chat", { withCredentials: true })
+    axios.get("api/chat", { withCredentials: true })
       .then(response => {
         dispatch(setChats(response.data.chats.reverse()));
       })
 
-    const tempSocket = io("http://localhost:3000", {
+    const tempSocket = io("/", {
       withCredentials: true,
     })
 
@@ -121,7 +121,7 @@ const [iloggedIn, setisLoggedIn] = useState(false);
 
   const getMessages = async (chatId) => {
 
-   const response = await  axios.get(`http://localhost:3000/api/chat/messages/${chatId}`, { withCredentials: true })
+   const response = await  axios.get(`api/chat/messages/${chatId}`, { withCredentials: true })
 
    console.log("Fetched messages:", response.data.messages);
 
