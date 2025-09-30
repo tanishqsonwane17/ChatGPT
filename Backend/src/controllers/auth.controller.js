@@ -36,7 +36,7 @@ async function registerUser(req, res) {
     });
   } catch (err) {
     console.error("Register Error:", err); // yahi se exact error dikhega
-    return res.status(500).json({ message: "Internal Server Error" });
+    return res.status(500).json({ message: "Internal Server Error" }, err);
   }
 }
 
@@ -71,7 +71,7 @@ async function loginUser(req, res) {
     });
   } catch (err) {
     console.error("Login Error:", err);
-    return res.status(500).json({ message: "Internal Server Error" });
+    return res.status(500).json({ message: "Internal Server Error" }, err);
   }
 }
 
@@ -81,7 +81,7 @@ async function logoutUser(req, res) {
     return res.status(200).json({ message: "User logged out successfully" });
   } catch (err) {
     console.error("Logout Error:", err);
-    return res.status(500).json({ message: "Internal Server Error" });
+    return res.status(500).json({ message: "Internal Server Error" }, err);
   }
 }
 
